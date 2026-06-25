@@ -1,0 +1,20 @@
+id: "incus"
+name: "Incus Manager"
+version: "0.1.0"
+enabled: true
+description: "Manage local Incus containers, virtual machines, snapshots, and exports"
+command: "/opt/host-agent/plugins/incus/incus-plugin"
+working_dir: "/opt/host-agent/plugins/incus"
+env:
+  INCUS_PROJECT: "default"
+  INCUS_BACKUP_DIR: "/var/lib/host-agent/incus-backups"
+  INCUS_OPERATION_TIMEOUT: "10m"
+  INCUS_IMAGE_SERVER: "https://images.linuxcontainers.org"
+  INCUS_IMAGE_PROTOCOL: "simplestreams"
+routes:
+  - path_prefix: "/status"
+    methods: ["GET"]
+  - path_prefix: "/instances"
+    methods: ["GET", "POST", "DELETE"]
+  - path_prefix: "/exports"
+    methods: ["GET", "POST", "DELETE"]
