@@ -2,5 +2,60 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "schedule": [
+    "before 9am on monday"
+  ],
+  "prConcurrentLimit": 10,
+  "labels": [
+    "dependencies"
+  ],
+  "platformAutomerge": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "minimumReleaseAge": "3 days",
+  "ignoreUnstable": true,
+  "commitMessagePrefix": "chore",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "groupName": "Go dependencies",
+      "groupSlug": "go-deps",
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "matchManagers": [
+        "docker"
+      ],
+      "groupName": "Docker dependencies",
+      "groupSlug": "docker-deps",
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions dependencies",
+      "groupSlug": "github-actions-deps",
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "platformAutomerge": false
+    }
   ]
 }
