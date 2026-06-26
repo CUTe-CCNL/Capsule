@@ -24,4 +24,4 @@ RUN go test -v -race -coverprofile=coverage.out ./...
 RUN GOFLAGS="-buildvcs=false" golangci-lint run --timeout=5m
 
 # 編譯
-RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -a -o host-agent .
+RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -a -o incus-plugin ./cmd/incus-plugin
