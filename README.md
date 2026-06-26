@@ -18,12 +18,21 @@
 ```bash
 make test
 make build
+make package
 ```
 
-產物會輸出到 `bin/incus-plugin`。其他 Make targets:
+`make build` 產物會輸出到 `bin/incus-plugin`。`make package` 會產生 release bundle 到 `dist/`，例如:
+
+```bash
+dist/incus-plugin-v0.1.0-linux-amd64.tar.gz
+```
+
+其他 Make targets:
 
 - `make run`: 建置後直接啟動 plugin binary。這會連線 Incus Unix socket，並等待 host-agent 的 stdio JSON-RPC request；一般部署時由 host-agent 啟動。
 - `make clean`: 清除 `bin/` 建置產物。
+- `make install`: 建置並安裝 plugin 到 host-agent plugin 目錄。
+- `make uninstall`: 從 host-agent plugin 目錄移除 plugin binary 與 manifest。
 
 ## Install
 
@@ -38,6 +47,42 @@ make build
 ```bash
 make build
 install -Dm755 bin/incus-plugin /opt/host-agent/plugins/incus/incus-plugin
+```
+
+也可以使用自動安裝腳本:
+
+```bash
+sudo make install
+```
+
+預設會安裝到:
+
+- binary: `/opt/host-agent/plugins/incus/incus-plugin`
+- manifest: `/opt/host-agent/plugins/incus.yaml`
+
+若 host-agent 使用不同 plugin 目錄，可用環境變數覆寫:
+
+```bash
+sudo PLUGIN_DIR=/path/to/plugins make install
+sudo PLUGIN_DIR=/path/to/plugins make uninstall
+```
+
+安裝腳本會依目標路徑更新 manifest 裡的 `command` 與 `working_dir`。刪除腳本只移除 plugin binary、manifest 與空的 plugin 目錄，不會刪除 Incus instance、snapshot 或 backup。
+
+從 release bundle 安裝:
+
+```bash
+tar -xzf incus-plugin-v0.1.0-linux-amd64.tar.gz
+sudo ./install.sh
+```
+
+## Release
+
+推送 `v*` tag 會由 GitHub Actions 自動建立 GitHub Release，並附上 Linux `amd64` 與 `arm64` tarball:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
 ## Configuration
