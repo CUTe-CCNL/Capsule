@@ -31,13 +31,13 @@ dist/incus-plugin-v0.1.0-linux-amd64.tar.gz
 
 - `make run`: 建置後直接啟動 plugin binary。這會連線 Incus Unix socket，並等待 host-agent 的 stdio JSON-RPC request；一般部署時由 host-agent 啟動。
 - `make clean`: 清除 `bin/` 建置產物。
-- `make install`: 建置並安裝 plugin 到 host-agent plugin 目錄。
-- `make uninstall`: 從 host-agent plugin 目錄移除 plugin binary 與 manifest。
+- `make install`: 建置並安裝 plugin binary 與 host-agent plugin manifest。
+- `make uninstall`: 移除 plugin binary 與 manifest。
 
 ## Install
 
 1. 確認 plugin binary 可執行。
-2. 將 `deploy/incus.yaml` 放到 host-agent 的 `plugins.directory`。
+2. 將 `deploy/incus.yaml` 放到 `/etc/host-agent/plugins.d`。
 3. 確認執行 host-agent 的使用者可以讀寫 Incus Unix socket，通常需要 root 或 `incus-admin` 群組權限。
 4. 確認 `INCUS_BACKUP_DIR` 可由 plugin 寫入。
 5. 建立 VM、匯出 backup 可能超過 host-agent 預設 timeout，建議把 host-agent `plugins.request_timeout` 設為 `10m` 或更長。
@@ -47,6 +47,8 @@ dist/incus-plugin-v0.1.0-linux-amd64.tar.gz
 ```bash
 make build
 install -Dm755 bin/incus-plugin /opt/host-agent/plugins/incus/incus-plugin
+install -Dm644 deploy/incus.yaml /etc/host-agent/plugins.d/incus.yaml
+systemctl restart host-agent
 ```
 
 也可以使用自動安裝腳本:
@@ -58,16 +60,18 @@ sudo make install
 預設會安裝到:
 
 - binary: `/opt/host-agent/plugins/incus/incus-plugin`
-- manifest: `/opt/host-agent/plugins/incus.yaml`
+- manifest: `/etc/host-agent/plugins.d/incus.yaml`
 
-若 host-agent 使用不同 plugin 目錄，可用環境變數覆寫:
+若 host-agent 使用不同 plugin 或 config 目錄，可用環境變數覆寫:
 
 ```bash
 sudo PLUGIN_DIR=/path/to/plugins make install
 sudo PLUGIN_DIR=/path/to/plugins make uninstall
+sudo CONFIG_DIR=/path/to/host-agent-config make install
+sudo CONFIG_DIR=/path/to/host-agent-config make uninstall
 ```
 
-安裝腳本會依目標路徑更新 manifest 裡的 `command` 與 `working_dir`。刪除腳本只移除 plugin binary、manifest 與空的 plugin 目錄，不會刪除 Incus instance、snapshot 或 backup。
+安裝腳本會依目標路徑更新 manifest 裡的 `command` 與 `working_dir`，並在完成後重啟 `host-agent` 服務。刪除腳本只移除 plugin binary、manifest 與空的 plugin 目錄，完成後也會重啟 `host-agent`；它不會刪除 Incus instance、snapshot 或 backup。
 
 從 release bundle 安裝:
 
