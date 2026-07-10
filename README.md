@@ -99,6 +99,7 @@ manifest env 可設定:
 - `INCUS_OPERATION_TIMEOUT`: 每個 Incus operation 等待時間，預設 `10m`。
 - `INCUS_IMAGE_SERVER`: 建立 instance 時使用的 image server，預設 `https://images.linuxcontainers.org`。
 - `INCUS_IMAGE_PROTOCOL`: image protocol，預設 `simplestreams`。
+- `INCUS_STORAGE_POOL`: 使用 `disk` 簡化欄位建立 root disk 時使用的 storage pool，預設 `default`；`devices.root.pool` 可覆寫此設定。
 
 ## API
 
@@ -118,11 +119,11 @@ curl -X POST http://localhost:9100/plugin-api/incus/instances \
   -d '{
     "name": "web-1",
     "type": "container",
-    "image": "ubuntu/24.04",
+    "image": "ubuntu/26.04",
     "profiles": ["default"],
     "network": "incusbr0",
     "cpu": 2,
-    "memory": "2GiB",
+    "memory": "4GiB",
     "disk": "20GiB",
     "start": true
   }'
@@ -134,21 +135,16 @@ curl -X POST http://localhost:9100/plugin-api/incus/instances \
 curl -X POST http://localhost:9100/plugin-api/incus/instances \
   -H 'Content-Type: application/json' \
   -d '{
-    "name": "vm-1",
-    "type": "virtual-machine",
-    "image": "ubuntu/24.04",
-    "profiles": ["default"],
-    "network": "incusbr0",
-    "config": {
-      "limits.cpu": "4",
-      "limits.memory": "8GiB",
-      "security.secureboot": "false"
-    },
-    "devices": {
-      "root": {"type": "disk", "path": "/", "pool": "default", "size": "80GiB"}
-    },
-    "start": true
-  }'
+      "name": "vm-1",
+      "type": "virtual-machine",
+      "image": "ubuntu/26.04",
+      "profiles": ["default"],
+      "network": "incusbr0",
+      "cpu": 2,
+      "memory": "4GiB",
+      "disk": "20GiB",
+      "start": true
+    }'
 ```
 
 Instance lifecycle:

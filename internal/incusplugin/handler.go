@@ -79,7 +79,7 @@ func (h *Handler) handleInstances(ctx context.Context, req pluginipc.HTTPRequest
 		return jsonResponse(http.StatusOK, map[string]interface{}{"instances": instances})
 
 	case len(segments) == 1 && req.Method == http.MethodPost:
-		createReq, err := decodeCreateInstance(req.Body)
+		createReq, err := decodeCreateInstance(req.Body, h.config.StoragePool)
 		if err != nil {
 			return jsonResponse(http.StatusBadRequest, map[string]string{"error": err.Error()})
 		}
@@ -269,7 +269,7 @@ type createInstancePayload struct {
 	Devices  map[string]map[string]string `json:"devices"`
 }
 
-func decodeCreateInstance(body []byte) (CreateInstanceRequest, error) {
+func decodeCreateInstance(body []byte, storagePool string) (CreateInstanceRequest, error) {
 	var payload createInstancePayload
 	if err := json.Unmarshal(body, &payload); err != nil {
 		return CreateInstanceRequest{}, err
@@ -297,11 +297,17 @@ func decodeCreateInstance(body []byte) (CreateInstanceRequest, error) {
 
 	devices := cloneNestedStringMap(payload.Devices)
 	if payload.Disk != "" {
+		if storagePool == "" {
+			storagePool = defaultStoragePool
+		}
 		if devices["root"] == nil {
-			devices["root"] = map[string]string{"type": "disk", "path": "/"}
+			devices["root"] = map[string]string{"type": "disk", "path": "/", "pool": storagePool}
 		}
 		devices["root"]["type"] = "disk"
 		devices["root"]["path"] = "/"
+		if devices["root"]["pool"] == "" {
+			devices["root"]["pool"] = storagePool
+		}
 		devices["root"]["size"] = payload.Disk
 	}
 	if payload.Network != "" {

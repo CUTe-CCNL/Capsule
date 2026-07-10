@@ -12,6 +12,7 @@ func TestConfigFromEnvUsesDefaults(t *testing.T) {
 	t.Setenv("INCUS_OPERATION_TIMEOUT", "")
 	t.Setenv("INCUS_IMAGE_SERVER", "")
 	t.Setenv("INCUS_IMAGE_PROTOCOL", "")
+	t.Setenv("INCUS_STORAGE_POOL", "")
 
 	cfg, err := ConfigFromEnv()
 	if err != nil {
@@ -36,6 +37,9 @@ func TestConfigFromEnvUsesDefaults(t *testing.T) {
 	if cfg.ImageProtocol != "simplestreams" {
 		t.Fatalf("ImageProtocol = %q, want simplestreams", cfg.ImageProtocol)
 	}
+	if cfg.StoragePool != "default" {
+		t.Fatalf("StoragePool = %q, want default", cfg.StoragePool)
+	}
 }
 
 func TestConfigFromEnvAllowsOverrides(t *testing.T) {
@@ -45,6 +49,7 @@ func TestConfigFromEnvAllowsOverrides(t *testing.T) {
 	t.Setenv("INCUS_OPERATION_TIMEOUT", "2m30s")
 	t.Setenv("INCUS_IMAGE_SERVER", "https://mirror.example.test")
 	t.Setenv("INCUS_IMAGE_PROTOCOL", "oci")
+	t.Setenv("INCUS_STORAGE_POOL", "fast")
 
 	cfg, err := ConfigFromEnv()
 	if err != nil {
@@ -68,6 +73,9 @@ func TestConfigFromEnvAllowsOverrides(t *testing.T) {
 	}
 	if cfg.ImageProtocol != "oci" {
 		t.Fatalf("ImageProtocol = %q, want oci", cfg.ImageProtocol)
+	}
+	if cfg.StoragePool != "fast" {
+		t.Fatalf("StoragePool = %q, want fast", cfg.StoragePool)
 	}
 }
 

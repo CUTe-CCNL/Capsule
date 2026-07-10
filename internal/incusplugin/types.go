@@ -12,6 +12,7 @@ type Config struct {
 	OperationTimeout time.Duration
 	ImageServer      string
 	ImageProtocol    string
+	StoragePool      string
 }
 
 type ServerInfo struct {

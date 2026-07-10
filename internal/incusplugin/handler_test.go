@@ -157,7 +157,7 @@ func TestStatusReturnsIncusConnectivity(t *testing.T) {
 
 func TestCreateInstanceBuildsRequestWithDefaultsAndOverrides(t *testing.T) {
 	client := &fakeClient{}
-	handler := NewHandler(Config{Project: "default"}, client)
+	handler := NewHandler(Config{Project: "default", StoragePool: "fast"}, client)
 
 	payload := map[string]interface{}{
 		"name":     "web-1",
@@ -201,11 +201,35 @@ func TestCreateInstanceBuildsRequestWithDefaultsAndOverrides(t *testing.T) {
 	if req.Devices["root"]["size"] != "80GiB" {
 		t.Fatalf("root disk size = %q, want 80GiB", req.Devices["root"]["size"])
 	}
+	if req.Devices["root"]["pool"] != "fast" {
+		t.Fatalf("root disk pool = %q, want fast", req.Devices["root"]["pool"])
+	}
 	if req.Devices["eth0"]["network"] != "ovn-prod" {
 		t.Fatalf("eth0 network = %q, want ovn-prod", req.Devices["eth0"]["network"])
 	}
 	if req.Devices["extra"]["path"] != "/data" {
 		t.Fatalf("extra disk path = %q, want /data", req.Devices["extra"]["path"])
+	}
+}
+
+func TestCreateInstancePreservesExplicitRootStoragePool(t *testing.T) {
+	client := &fakeClient{}
+	handler := NewHandler(Config{StoragePool: "fast"}, client)
+
+	response := handle(t, handler, http.MethodPost, "/instances", map[string]interface{}{
+		"name":  "web-1",
+		"image": "ubuntu/24.04",
+		"disk":  "20GiB",
+		"devices": map[string]map[string]string{
+			"root": {"pool": "archive"},
+		},
+	})
+
+	if response.StatusCode != http.StatusAccepted {
+		t.Fatalf("StatusCode = %d, want %d", response.StatusCode, http.StatusAccepted)
+	}
+	if pool := client.createdInstance.Devices["root"]["pool"]; pool != "archive" {
+		t.Fatalf("root disk pool = %q, want archive", pool)
 	}
 }
 

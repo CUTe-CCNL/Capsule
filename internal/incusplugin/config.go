@@ -12,6 +12,7 @@ const (
 	defaultOperationTimeout = 10 * time.Minute
 	defaultImageServer      = "https://images.linuxcontainers.org"
 	defaultImageProtocol    = "simplestreams"
+	defaultStoragePool      = "default"
 )
 
 func ConfigFromEnv() (Config, error) {
@@ -22,6 +23,7 @@ func ConfigFromEnv() (Config, error) {
 		OperationTimeout: defaultOperationTimeout,
 		ImageServer:      envOrDefault("INCUS_IMAGE_SERVER", defaultImageServer),
 		ImageProtocol:    envOrDefault("INCUS_IMAGE_PROTOCOL", defaultImageProtocol),
+		StoragePool:      envOrDefault("INCUS_STORAGE_POOL", defaultStoragePool),
 	}
 
 	if value := os.Getenv("INCUS_OPERATION_TIMEOUT"); value != "" {
